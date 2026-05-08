@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase";
+import Navbar from "@/components/Navbar";
 
 const tagColors: { [key: string]: string } = {
   Networking: "bg-blue-500/20 text-blue-300",
@@ -15,17 +16,7 @@ export default async function Home() {
     <main className="min-h-screen bg-[#0a0e1a] text-white">
 
       {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-        <span className="text-xl font-bold text-blue-300">UniConnect</span>
-        <ul className="hidden md:flex gap-8 text-sm text-white/60">
-          <li>イベント</li>
-          <li>コミュニティ</li>
-          <li>大学一覧</li>
-        </ul>
-        <button className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-5 py-2 rounded-full transition">
-          無料登録
-        </button>
-      </nav>
+<Navbar />
 
       {/* Hero */}
       <section className="flex flex-col items-center text-center px-6 py-20 md:py-32">

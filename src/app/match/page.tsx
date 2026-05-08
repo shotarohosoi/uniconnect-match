@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
+import Navbar from "@/components/Navbar";
 
 const tagColors: { [key: string]: string } = {
   スタートアップ: "bg-blue-500/20 text-blue-300",
@@ -85,16 +86,12 @@ export default function MatchPage() {
 
   return (
     <main className="min-h-screen bg-[#0a0e1a] text-white">
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-        <a href="/" className="text-xl font-bold text-blue-300">UniConnect</a>
-        <a href="/mypage" className="text-sm text-white/40 hover:text-white transition">マイページ</a>
-      </nav>
+      <Navbar />
 
       <div className="max-w-md mx-auto px-6 py-12">
         <h1 className="text-2xl font-bold text-center mb-2">マッチング</h1>
         <p className="text-white/40 text-sm text-center mb-10">気になる人にいいねしよう</p>
 
-        {/* マッチ通知 */}
         {matched && (
           <div className="bg-pink-500/10 border border-pink-500/30 rounded-2xl p-6 text-center mb-8">
             <p className="text-2xl mb-2">🎉</p>
@@ -109,7 +106,6 @@ export default function MatchPage() {
           </div>
         )}
 
-        {/* プロフィールカード */}
         {current < profiles.length ? (
           <div>
             <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6">

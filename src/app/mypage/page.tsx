@@ -1,35 +1,57 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase";
+import Navbar from "@/components/Navbar";
 
 const tabs = ["プロフィール", "参加イベント", "マッチング"];
 
 export default function MyPage() {
   const [activeTab, setActiveTab] = useState("プロフィール");
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+
+  const supabase = createClient();
+
+  useEffect(() => {
+    const init = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = "/auth";
+        return;
+      }
+      setUser(user);
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+      setProfile(data);
+    };
+    init();
+  }, []);
 
   return (
     <main className="min-h-screen bg-[#0a0e1a] text-white">
-
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-        <a href="/" className="text-xl font-bold text-blue-300">UniConnect</a>
-        <button className="text-sm text-white/40 hover:text-white transition">ログアウト</button>
-      </nav>
+      <Navbar />
 
       <div className="max-w-3xl mx-auto px-6 py-10">
 
         {/* Profile Header */}
         <div className="flex items-center gap-6 mb-10">
           <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center text-2xl font-bold text-blue-300">
-            田
+            {profile?.name?.[0] || user?.email?.[0] || "?"}
           </div>
           <div>
-            <h1 className="text-2xl font-bold">田中 葵</h1>
-            <p className="text-white/40 text-sm mt-1">東京大学 3年・経済学部</p>
-            <p className="text-white/40 text-sm">hosoi.shotaro@gmail.com</p>
+            <h1 className="text-2xl font-bold">{profile?.name || "名前未設定"}</h1>
+            <p className="text-white/40 text-sm mt-1">{profile?.university || "大学未設定"}</p>
+            <p className="text-white/40 text-sm">{user?.email}</p>
           </div>
-          <button className="ml-auto text-sm border border-white/20 hover:border-blue-400 text-white/60 hover:text-white px-4 py-2 rounded-full transition">
-            編集
-          </button>
+          <a href="/match" className="ml-auto">
+            <button className="text-sm border border-white/20 hover:border-blue-400 text-white/60 hover:text-white px-4 py-2 rounded-full transition">
+              マッチングへ
+            </button>
+          </a>
         </div>
 
         {/* Tabs */}
@@ -56,17 +78,17 @@ export default function MyPage() {
               <div>
                 <div className="text-xs text-white/30 mb-1">自己紹介</div>
                 <p className="text-sm text-white/70 leading-relaxed">
-                  将来は社会起業家を目指して勉強中。共通の夢を語り合える人と出会いたいです。
+                  {profile?.bio || "自己紹介未設定"}
                 </p>
               </div>
               <div>
                 <div className="text-xs text-white/30 mb-2">興味・タグ</div>
                 <div className="flex flex-wrap gap-2">
-                  {["スタートアップ", "読書", "カフェ巡り"].map((tag) => (
+                  {profile?.tags?.map((tag: string) => (
                     <span key={tag} className="text-xs bg-white/10 text-white/60 px-3 py-1 rounded-full">
                       {tag}
                     </span>
-                  ))}
+                  )) || <span className="text-xs text-white/30">タグ未設定</span>}
                 </div>
               </div>
             </div>
@@ -75,55 +97,23 @@ export default function MyPage() {
 
         {/* Tab: 参加イベント */}
         {activeTab === "参加イベント" && (
-          <div className="space-y-4">
-            {[
-              { title: "春のキャリア交流会 2025", date: "5月15日 (木)", tag: "Networking", color: "blue" },
-              { title: "スタートアップ実践ワークショップ", date: "5月22日 (木)", tag: "Workshop", color: "teal" },
-            ].map((event) => (
-              <div key={event.title} className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-blue-500/40 transition cursor-pointer">
-                <span className={`text-xs px-3 py-1 rounded-full ${
-                  event.color === "blue" ? "bg-blue-500/20 text-blue-300" : "bg-teal-500/20 text-teal-300"
-                }`}>
-                  {event.tag}
-                </span>
-                <h3 className="font-semibold mt-3 mb-1">{event.title}</h3>
-                <p className="text-xs text-white/40">{event.date}</p>
-              </div>
-            ))}
+          <div className="text-center py-12">
+            <p className="text-white/40 text-sm">参加イベントはまだありません</p>
+            <a href="/" className="text-blue-400 text-sm hover:underline mt-4 block">
+              イベントを探す
+            </a>
           </div>
         )}
 
         {/* Tab: マッチング */}
         {activeTab === "マッチング" && (
-          <div className="space-y-4">
-            <div className="bg-white/5 border border-white/10 rounded-xl p-5">
-              <p className="text-sm text-white/40 text-center py-4">
-                マッチング機能はイベント参加後に解放されます
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { name: "鈴木 蓮", univ: "慶應義塾大学 2年", tags: ["プログラミング", "音楽"], initial: "蓮", color: "teal" },
-                { name: "佐藤 陽菜", univ: "早稲田大学 4年", tags: ["旅行", "映画"], initial: "陽", color: "purple" },
-              ].map((match) => (
-                <div key={match.name} className="bg-white/5 border border-white/10 rounded-xl p-5 flex gap-4 items-center">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold flex-shrink-0 ${
-                    match.color === "teal" ? "bg-teal-500/20 text-teal-300" : "bg-purple-500/20 text-purple-300"
-                  }`}>
-                    {match.initial}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">{match.name}</p>
-                    <p className="text-xs text-white/40 mt-0.5">{match.univ}</p>
-                    <div className="flex gap-1 mt-2 flex-wrap">
-                      {match.tags.map((tag) => (
-                        <span key={tag} className="text-xs bg-white/10 text-white/50 px-2 py-0.5 rounded-full">{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="text-center py-12 space-y-4">
+            <p className="text-white/40 text-sm">まだマッチングがありません</p>
+            <a href="/match">
+              <button className="bg-pink-600 hover:bg-pink-500 text-white px-6 py-2 rounded-full text-sm transition">
+                マッチングを始める
+              </button>
+            </a>
           </div>
         )}
 
