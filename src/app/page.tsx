@@ -1,4 +1,16 @@
-export default function Home() {
+import { createClient } from "@/lib/supabase";
+
+const tagColors: { [key: string]: string } = {
+  Networking: "bg-blue-500/20 text-blue-300",
+  Workshop: "bg-teal-500/20 text-teal-300",
+  Hackathon: "bg-amber-500/20 text-amber-300",
+  Seminar: "bg-purple-500/20 text-purple-300",
+};
+
+export default async function Home() {
+  const supabase = createClient();
+  const { data: events } = await supabase.from("events").select("*");
+
   return (
     <main className="min-h-screen bg-[#0a0e1a] text-white">
 
@@ -58,47 +70,19 @@ export default function Home() {
           <span className="text-blue-400 text-sm cursor-pointer hover:underline">すべて見る →</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto">
-
-          <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-blue-500/40 transition cursor-pointer">
-            <span className="text-xs bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full">Networking</span>
-            <h3 className="font-semibold mt-3 mb-2">春のキャリア交流会 2025</h3>
-            <div className="flex flex-wrap gap-2 text-xs text-white/40">
-              <span>5月15日 (木)</span>
-              <span>東京大学 本郷</span>
-              <span>参加者 120名</span>
-            </div>
-          </div>
-
-          <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-blue-500/40 transition cursor-pointer">
-            <span className="text-xs bg-teal-500/20 text-teal-300 px-3 py-1 rounded-full">Workshop</span>
-            <h3 className="font-semibold mt-3 mb-2">スタートアップ実践ワークショップ</h3>
-            <div className="flex flex-wrap gap-2 text-xs text-white/40">
-              <span>5月22日 (木)</span>
-              <span>早稲田大学 西早稲田</span>
-              <span>参加者 60名</span>
-            </div>
-          </div>
-
-          <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-blue-500/40 transition cursor-pointer">
-            <span className="text-xs bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full">Hackathon</span>
-            <h3 className="font-semibold mt-3 mb-2">UniHack 2025 — 48時間ハッカソン</h3>
-            <div className="flex flex-wrap gap-2 text-xs text-white/40">
-              <span>6月7日〜8日</span>
-              <span>慶應大学 日吉</span>
-              <span>参加者 200名</span>
-            </div>
-          </div>
-
-          <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-blue-500/40 transition cursor-pointer">
-            <span className="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full">Seminar</span>
-            <h3 className="font-semibold mt-3 mb-2">社会課題解決 × 若者の力 特別講演</h3>
-            <div className="flex flex-wrap gap-2 text-xs text-white/40">
-              <span>6月14日 (土)</span>
-              <span>オンライン開催</span>
-              <span>参加者 500名</span>
-            </div>
-          </div>
-
+          {events?.map((event) => (
+            <a key={event.id} href={`/event/${event.id}`} className="bg-white/5 border border-white/10 rounded-xl p-5 hover:border-blue-500/40 transition cursor-pointer block">
+              <span className={`text-xs px-3 py-1 rounded-full ${tagColors[event.tag] || "bg-white/10 text-white/60"}`}>
+                {event.tag}
+              </span>
+              <h3 className="font-semibold mt-3 mb-2">{event.title}</h3>
+              <div className="flex flex-wrap gap-2 text-xs text-white/40">
+                <span>{event.date}</span>
+                <span>{event.location}</span>
+                <span>定員 {event.capacity}名</span>
+              </div>
+            </a>
+          ))}
         </div>
       </section>
 
@@ -115,5 +99,5 @@ export default function Home() {
       </footer>
 
     </main>
-  )
+  );
 }
